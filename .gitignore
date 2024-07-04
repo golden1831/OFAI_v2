@@ -1,0 +1,9 @@
+data
+node_modules
+dist
+.env
+.env.dev
+.env.prod
+.env.qa
+.env.staging
+test*

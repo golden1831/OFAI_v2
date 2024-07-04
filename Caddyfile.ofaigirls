@@ -1,0 +1,13 @@
+# API Reverse Proxy
+api.ofaigirls.com {
+  reverse_proxy api:3000
+}
+
+# Client Reverse Proxy
+ofaigirls.com, www.ofaigirls.com {
+  reverse_proxy client:5173
+}
+
+
+
+

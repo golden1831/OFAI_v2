@@ -1,0 +1,14 @@
+export {default as pinkFireIcon} from './fire.svg'
+export {default as pinkOnlyFansIcon} from './onlyfans.svg'
+export {default as pinkStarIcon} from './star.svg'
+export {default as pinkTwinkleIcon} from './twinkle.svg'
+export {default as pinkChattingIcon} from './chatting.svg'
+export {default as pinkImageIcon} from './image.svg'
+export {default as pinkPhoneIcon} from './phone.svg'
+export {default as pinkGemIcon} from './gem.svg'
+export {default as pinkCoinIcon} from './coin.svg'
+export {default as voiceIcon} from "./voice.svg"
+export {default as chat2Icon} from "./chat-2.svg"
+export {default as pinkPaymentIcon} from './payment.svg'
+export {default as pinkCircleCheckIcon} from './circle-check.svg'
+export {default as pinkMicrophoneIcon} from './microphone.svg'

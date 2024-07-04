@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  # api
+  api:
+    build: 
+      context: ./api
+      dockerfile: Dockerfile
+    image: api
+    container_name: api
+    network_mode: host
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./api/.env
+    restart: always
+
+  # client
+  client:
+    build: 
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:3000
+    image: client
+    container_name: client
+    ports:
+      - "5173:80" # Caddy will automatically proxy requests to this service
+    # depends_on:
+    #   - api
+    network_mode: host
+    restart: always

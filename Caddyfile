@@ -1,0 +1,13 @@
+# API Reverse Proxy
+api.ofai.app {
+  reverse_proxy api:3000
+}
+
+# Client Reverse Proxy
+ofai.app, www.ofai.app {
+  reverse_proxy client:5173
+}
+
+
+
+

@@ -1,0 +1,9 @@
+# API Reverse Proxy for Development
+apidev.myof.ai {
+  reverse_proxy api:3000
+}
+
+# Client Reverse Proxy for Development
+dev.myof.ai {
+  reverse_proxy client:5173
+}
