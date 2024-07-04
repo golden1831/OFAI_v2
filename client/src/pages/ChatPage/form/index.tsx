@@ -1,11 +1,11 @@
-import { Dispatch, FormEvent, SetStateAction, useRef } from 'react';
+import { Dispatch, FormEvent, SetStateAction, useRef, useState } from 'react';
 import { imageIcon, twinkleIcon } from '../../../assets/icons';
-import { voiceIcon, chat2Icon } from '../../../assets/icons/pink';
+import { voiceIcon, chat2Icon, pinkMicrophoneIcon } from '../../../assets/icons/pink';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import BubblesFormFooter from './BubblesFormFooter';
 import { MessageMode } from '../../../types/message.types';
 import { clsx } from 'clsx';
- 
+
 interface FormProps {
   mode: string;
   setMode: Dispatch<SetStateAction<MessageMode>>;
@@ -30,12 +30,66 @@ export default function Form({
   setTogglePicOptions
 }: FormProps) {
   const InputRef = useRef<HTMLInputElement>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
 
   const userIsTyping = messageContent !== '';
 
   const clearInput = () => {
     if (InputRef.current) {
       InputRef.current.value = '';
+    }
+  };
+
+  const handleMicPress = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Your browser does not support audio recording');
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      recorder.ondataavailable = async (event) => {
+        if (event.data.size > 0) {
+          const audioBlob = event.data;
+          const formData = new FormData();
+          formData.append('file', audioBlob);
+
+          try {
+            const response = await fetch('https://api.deepgram.com/v1/listen', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Token ${import.meta.env.VITE_DEEPGRAM_API_KEY}`,
+              },
+              body: formData
+            });
+
+            const result = await response.json();
+            console.log(result);
+            const transcript = result.results.channels[0].alternatives[0].transcript;
+            if (transcript) {
+              onSubmit(undefined, transcript);
+            }
+          } catch (error) {
+            console.error('Error transcribing audio:', error);
+          }
+        }
+      };
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+      console.log("Recording started");
+    } catch (error) {
+      console.error('Microphone access denied', error);
+    }
+  };
+
+  const handleMicRelease = () => {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      console.log("Recording stopped");
     }
   };
 
@@ -47,19 +101,6 @@ export default function Form({
       }}
       className={clsx("fixed md:relative flex flex-col px-2 pb-4 gap-2 w-full bg-black/35 backdrop-blur-lg bottom-0 justify-between items-center h-[132px] pt-4 md:pt-5 md:px-5 md:pb-7")}
     >
-      {/* {isLastAssistantMessage && (
-        <p className="text-xs flex items-center gap-1 mr-auto text-white font-medium">
-          Suggested Reply:
-          <button
-            type="button"
-            onClick={() => onSubmit(undefined, "Sounds amazing! I would love to work on a project with you =)")}
-            className="opacity-60 transition-all duration-300 hover:opacity-100"
-          >
-            Sounds amazing! I would love to work on a project with you =)
-          </button>
-        </p>
-      )} */}
-
       {isResponding && (
         <p className="font-medium opacity-0 text-white absolute text-nowrap right-14 animate-fadeInOut">+10 XP</p>
       )}
@@ -89,6 +130,27 @@ export default function Form({
           ref={InputRef}
           autoComplete="off"
         />
+
+        {mode === MessageMode.audio && (
+          <div
+            className={clsx(
+              "h-full rounded-r-full relative flex justify-center items-center p-1 bg-transparent",
+              { 'animate-pulse': isRecording }
+            )}
+            onMouseDown={handleMicPress}
+            onMouseUp={handleMicRelease}
+            onTouchStart={handleMicPress}
+            onTouchEnd={handleMicRelease}
+          >
+            <img
+              src={pinkMicrophoneIcon}
+              className={clsx("ml-2 mr-1.5 cursor-pointer transition-transform duration-200", {
+                'size-7': isRecording,
+                'size-5': !isRecording
+              })}
+            />
+          </div>
+        )}
 
         <div className="h-full rounded-r-full relative flex justify-center items-center p-1 bg-transparent">
           {!userIsTyping ? (
