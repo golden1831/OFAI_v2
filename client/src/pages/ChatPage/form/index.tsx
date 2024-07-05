@@ -9,7 +9,6 @@ import { Icon } from "@iconify/react/dist/iconify.js";
 import BubblesFormFooter from "./BubblesFormFooter";
 import { MessageMode } from "../../../types/message.types";
 import { clsx } from "clsx";
-import CallScreen from "../CallScreen"; // Import the CallScreen component
 
 interface FormProps {
   mode: string;
@@ -37,11 +36,7 @@ export default function Form({
   setIsCalling,
 }: FormProps) {
   const InputRef = useRef<HTMLInputElement>(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
-    null
-  );
-  const [showCallScreen, setShowCallScreen] = useState(false); // State to manage the call screen visibility
+  const [hasMicPermission, setHasMicPermission] = useState(false); // State to track mic permission
 
   const userIsTyping = messageContent !== "";
 
@@ -52,70 +47,26 @@ export default function Form({
   };
 
   const handleMicPress = async () => {
-    setShowCallScreen(true); // Show the call screen when the mic button is pressed
-
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("Your browser does not support audio recording");
-      return;
+    if (!hasMicPermission) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // If the permission is granted, set the flag to true
+        setHasMicPermission(true);
+        return;
+      } catch (error) {
+        // If permission is denied, show an alert
+        alert("Please grant microphone access to start recording.");
+        return;
+      }
     }
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      recorder.ondataavailable = async (event) => {
-        if (event.data.size > 0) {
-          const audioBlob = event.data;
-          const formData = new FormData();
-          formData.append("file", audioBlob);
-
-          try {
-            const response = await fetch("https://api.deepgram.com/v1/listen", {
-              method: "POST",
-              headers: {
-                Authorization: `Token ${import.meta.env.VITE_DEEPGRAM_API_KEY}`,
-              },
-              body: formData,
-            });
-
-            const result = await response.json();
-            console.log(result);
-            const transcript =
-              result.results.channels[0].alternatives[0].transcript;
-            if (transcript) {
-              onSubmit(undefined, transcript);
-            }
-          } catch (error) {
-            console.error("Error transcribing audio:", error);
-          }
-        }
-      };
-      recorder.start();
-      setMediaRecorder(recorder);
-      setIsRecording(true);
-      console.log("Recording started");
-    } catch (error) {
-      console.error("Microphone access denied", error);
-    }
+    // Launch the CallScreen only if the permission is granted
+    setIsCalling(true);
   };
 
-  const handleMicRelease = () => {
-    if (mediaRecorder && mediaRecorder.state === "recording") {
-      mediaRecorder.stop();
-      setIsRecording(false);
-      console.log("Recording stopped");
-    }
-  };
 
   return (
     <>
-      {showCallScreen && (
-        <CallScreen
-          profileImage="path/to/profileImage" // Replace with actual path or prop
-          profileName="Profile Name" // Replace with actual name or prop
-          onClose={() => setShowCallScreen(false)}
-        />
-      )}
-
       <form
         onSubmit={(e) => {
           onSubmit(e);
@@ -164,22 +115,18 @@ export default function Form({
           <div
             className={clsx(
               "h-full rounded-r-full relative flex justify-center items-center p-1 bg-transparent",
-              { "animate-pulse": isRecording }
             )}
-            onMouseDown={() => setIsCalling(true)}
+            onMouseDown={handleMicPress}
           >
             <img
               src={pinkMicrophoneIcon}
               className={clsx(
-                "ml-2 mr-1.5 cursor-pointer transition-transform duration-200",
-                {
-                  "size-7": isRecording,
-                  "size-5": !isRecording,
-                }
+                "ml-2 mr-1.5 cursor-pointer transition-transform duration-200 size-6",
+
               )}
             />
           </div>
-          )
+          
           <div className="h-full rounded-r-full relative flex justify-center items-center p-1 bg-transparent">
             {!userIsTyping ? (
               <div className="flex p-2.5 items-center justify-center rounded-full transition-all ease-in-out duration-150">

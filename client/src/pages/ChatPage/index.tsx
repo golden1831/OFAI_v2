@@ -297,21 +297,21 @@ const ChatPage = () => {
   
       {isCalling && (
         <div
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          width: '50%',
-          height: '60%',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 1001,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          transform: 'translate(-50%, -50%)',
-        }}
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0)',
+            zIndex: 1002,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            transform: 'translate(-50%, -50%)',
+          }}
         >
-          <CallScreen profileImage={model.image.url} profileName={model.firstName} modelId={model._id} setIsCalling={setIsCalling}/>
+          <CallScreen profileImage={model.image.url} profileName={model.firstName} modelId={model._id} setIsCalling={setIsCalling} />
         </div>
       )}
   
@@ -358,7 +358,13 @@ const ChatPage = () => {
           )}
         </div>
   
-        <div className="w-1/2 h-full hidden md:flex" style={{ zIndex: 1 }}>
+        <div
+          className="w-1/2 h-full hidden md:flex"
+          style={{
+            zIndex: 1,
+            filter: isCalling ? 'blur(5px)' : 'none',
+          }}
+        >
           <ChatInboxPage />
         </div>
       </div>
@@ -371,7 +377,6 @@ const ChatPage = () => {
         <ButtonPrimary
           onClick={async () => {
             setShowSignInPopup(false);
-  
             await connect();
           }}
         >
@@ -380,6 +385,7 @@ const ChatPage = () => {
       </Popup>
     </div>
   );
+  
   
 };
 
