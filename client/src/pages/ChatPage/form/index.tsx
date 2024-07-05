@@ -36,10 +36,6 @@ export default function Form({
   setIsCalling,
 }: FormProps) {
   const InputRef = useRef<HTMLInputElement>(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
-    null
-  );
   const [hasMicPermission, setHasMicPermission] = useState(false); // State to track mic permission
 
   const userIsTyping = messageContent !== "";
@@ -119,18 +115,14 @@ export default function Form({
           <div
             className={clsx(
               "h-full rounded-r-full relative flex justify-center items-center p-1 bg-transparent",
-              { "animate-pulse": isRecording }
             )}
             onMouseDown={handleMicPress}
           >
             <img
               src={pinkMicrophoneIcon}
               className={clsx(
-                "ml-2 mr-1.5 cursor-pointer transition-transform duration-200",
-                {
-                  "size-7": isRecording,
-                  "size-5": !isRecording,
-                }
+                "ml-2 mr-1.5 cursor-pointer transition-transform duration-200 size-6",
+
               )}
             />
           </div>

@@ -1,11 +1,8 @@
 import { Dispatch, SetStateAction, useState, useRef } from "react";
-// import { Icon } from "@iconify/react";
 import mic from "../../assets/icons/mic.svg";
 import { useSendMessageMutation } from "../../Navigation/redux/apis/messageApi";
 import { MessageMode } from "../../types/message.types";
 import { useWeb3Auth } from "../../providers/Wallet";
-// import { background } from "@chakra-ui/react";
-// import { Helmet } from "react-helmet";
 
 interface CallScreenProps {
   profileImage: string;
@@ -122,9 +119,7 @@ export default function CallScreen({
     };
   };
 
-  //   const audioPlayAnimation = () => {
-  //     return isPlaying ? { animation: "bob 1s infinite" } : {};
-  //   };
+  const micAnimationStyle = isRecording || isPlaying ? { animation: "bob 1s infinite" } : {};
 
   return (
     <div
@@ -153,7 +148,7 @@ export default function CallScreen({
             style={{
               ...styles.micButton,
               backgroundColor: isRecording ? "red" : "rgba(0,0,0,0.3)",
-              animation: isRecording ? "bob 1s infinite" : "none",
+              ...micAnimationStyle,
             }}
             onMouseDown={handleMicPress}
             onMouseUp={handleMicRelease}
@@ -196,7 +191,6 @@ const styles = {
     position: "absolute" as const,
     top: "10px",
     left: "10px", // changed from left to right
-    // backgroundColor: 'rgba(0, 0, 0, 0.5)',
     padding: "10px 20px",
     borderRadius: "20px",
     fontSize: "1.2em",
@@ -237,7 +231,7 @@ const styles = {
     backgroundSize: "fit",
     backgroundRepeat: "no-repeat",
     backgroundPosition: "center",
-    // boxShadow: "0px 0px 10px rgba(0,0,0,0.5)"
+    cursor: 'pointer',
   },
   micText: {
     fontSize: "0.9em",
@@ -246,21 +240,21 @@ const styles = {
   endCallButton: {
     position: "absolute" as const,
     top: "10px",
-    right: "10px", // changed from left to right
-    // backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    right: "10px",
     padding: "5px 20px",
     borderRadius: "20px",
     fontSize: "1.6em",
     color: "#fff",
     boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
     background: "rgba(0,0,0,0.5)",
+    cursor: 'pointer',
   },
   transcriptionBox: {
     backgroundColor: "rgba(0,0,0,0.4)",
     borderRadius: "10px",
     padding: "10px",
     width: "100%",
-    marginTop:"10px"
+    marginTop: "10px",
   },
   transcriptionText: {
     fontSize: "1em",
