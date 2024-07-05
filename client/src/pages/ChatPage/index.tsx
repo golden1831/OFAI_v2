@@ -23,7 +23,6 @@ import { RootState } from '../../Navigation/redux/store/store';
 import { useGetCompanionsByUsernameQuery } from '../../Navigation/redux/apis/companionApi';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { IMessageChat } from './types';
-import CallScreen from './CallScreen';
 
 const ChatPage = () => {
   const [mode, setMode] = useState<MessageMode>(MessageMode.text);
@@ -36,7 +35,6 @@ const ChatPage = () => {
   const [showSignInPopup, setShowSignInPopup] = useState(false);
   const [togglePicOptions, setTogglePicOptions] = useState(false);
   const [messageIdReceveid, setMessageIdReceived] = useState<string | null>(null);
-  const [isCalling, setIsCalling] = useState(false); // State to manage call screen visibility
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -289,42 +287,21 @@ const ChatPage = () => {
   console.log({ showSignInPopup })
 
   return (
-    <div className="size-full overflow-hidden flex justify-center items-center">
+    <div className="size-full overflow-hidden">
       <Helmet>
         <meta property="og:image" content={model.image.url} />
         <meta property="og:description" content={model.shortBio} />
       </Helmet>
-  
-      {isCalling && (
-        <div
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          width: '50%',
-          height: '50%',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 1001,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          transform: 'translate(-50%, -50%)',
-        }}
-        >
-          <CallScreen profileImage={model.image.url} profileName={model.firstName} modelId={model._id} />
-        </div>
-      )}
-  
-      <div className="size-full flex justify-between items-center">
+
+      <div className="size-full justify-between items-center flex">
         <div
           style={{
             backgroundImage: `url(${model?.image.url || ''})`,
-            filter: isCalling ? 'blur(5px)' : 'none',
           }}
           className="fixed top-0 w-full h-dvh bg-cover bg-top bg-no-repeat flex-col gap-2 overflow-hidden sm:gap-4 md:h-full md:relative"
         >
           <ChatNav Model={model} userXP={userXP} />
-  
+
           <Messages
             mode={mode}
             user={user}
@@ -335,7 +312,7 @@ const ChatPage = () => {
             togglePicOptions={togglePicOptions}
             messageIdReceveid={messageIdReceveid}
           />
-  
+
           <Form
             mode={mode}
             setMode={setMode}
@@ -346,32 +323,31 @@ const ChatPage = () => {
             togglePicOptions={togglePicOptions}
             setMessageContent={setMessageContent}
             setTogglePicOptions={setTogglePicOptions}
-            setIsCalling={setIsCalling}
           />
-  
+
           {showGiftUI && (
-            <Gift
-              modelImage={model.image.url}
-              setShowGiftUI={setShowGiftUI}
-              modelFirstName={model.firstName}
+            <Gift 
+              modelImage={model.image.url} 
+              setShowGiftUI={setShowGiftUI} 
+              modelFirstName={model.firstName} 
             />
           )}
         </div>
-  
-        <div className="w-1/2 h-full hidden md:flex" style={{ zIndex: 1 }}>
+
+        <div className="w-1/2 h-full hidden md:flex">
           <ChatInboxPage />
         </div>
       </div>
-  
+
       <Popup imageUrl={model.image.url} show={showSignInPopup} close={() => setShowSignInPopup(false)}>
-        <h1 className="font-bold text-2xl text-center">Sign-up and get 500 GEMS for free!</h1>
-  
+        <h1 className="font-bold text-2xl text-center">Sign-up and get 500 GEMS for free !</h1>
+
         <p className="text-center">You'll get 10 free messages & 10 GEMS each day you check-in 😉</p>
-  
+
         <ButtonPrimary
           onClick={async () => {
             setShowSignInPopup(false);
-  
+
             await connect();
           }}
         >
@@ -380,7 +356,6 @@ const ChatPage = () => {
       </Popup>
     </div>
   );
-  
 };
 
 export default ChatPage;
