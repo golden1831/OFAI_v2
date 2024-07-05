@@ -1,10 +1,11 @@
-import { Dispatch, SetStateAction, useState, useRef } from 'react';
-import { Icon } from '@iconify/react';
-import { pinkMicrophoneIcon } from '../../assets/icons/pink';
-import { useSendMessageMutation } from '../../Navigation/redux/apis/messageApi';
-import { MessageMode } from '../../types/message.types';
-import { useWeb3Auth } from '../../providers/Wallet';
-import { Helmet } from 'react-helmet';
+import { Dispatch, SetStateAction, useState, useRef } from "react";
+// import { Icon } from "@iconify/react";
+import mic from "../../assets/icons/mic.svg";
+import { useSendMessageMutation } from "../../Navigation/redux/apis/messageApi";
+import { MessageMode } from "../../types/message.types";
+import { useWeb3Auth } from "../../providers/Wallet";
+// import { background } from "@chakra-ui/react";
+// import { Helmet } from "react-helmet";
 
 interface CallScreenProps {
   profileImage: string;
@@ -13,9 +14,14 @@ interface CallScreenProps {
   setIsCalling: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function CallScreen({ profileImage, profileName, modelId, setIsCalling }: CallScreenProps) {
+export default function CallScreen({
+  profileImage,
+  profileName,
+  modelId,
+  setIsCalling,
+}: CallScreenProps) {
   const [isRecording, setIsRecording] = useState(false);
-  const [transcription, setTranscription] = useState('');
+  const [transcription, setTranscription] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [sendMessageMutation] = useSendMessageMutation();
   const { headers } = useWeb3Auth();
@@ -25,7 +31,9 @@ export default function CallScreen({ profileImage, profileName, modelId, setIsCa
   const handleMicPress = async () => {
     if (!isRecording) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
         const mediaRecorder = new MediaRecorder(stream);
         audioChunksRef.current = [];
 
@@ -33,26 +41,32 @@ export default function CallScreen({ profileImage, profileName, modelId, setIsCa
           if (event.data.size > 0) {
             const audioBlob = event.data;
             const formData = new FormData();
-            formData.append('file', audioBlob);
+            formData.append("file", audioBlob);
 
             try {
-              const response = await fetch('https://api.deepgram.com/v1/listen', {
-                method: 'POST',
-                headers: {
-                  Authorization: `Token ${import.meta.env.VITE_DEEPGRAM_API_KEY}`,
-                },
-                body: formData,
-              });
+              const response = await fetch(
+                "https://api.deepgram.com/v1/listen",
+                {
+                  method: "POST",
+                  headers: {
+                    Authorization: `Token ${
+                      import.meta.env.VITE_DEEPGRAM_API_KEY
+                    }`,
+                  },
+                  body: formData,
+                }
+              );
 
               const result = await response.json();
               console.log(result);
-              const transcript = result.results.channels[0].alternatives[0].transcript;
+              const transcript =
+                result.results.channels[0].alternatives[0].transcript;
               if (transcript) {
                 setTranscription(transcript);
                 await sendTranscriptToBackend(transcript);
               }
             } catch (error) {
-              console.error('Error transcribing audio:', error);
+              console.error("Error transcribing audio:", error);
             }
           }
         };
@@ -60,10 +74,10 @@ export default function CallScreen({ profileImage, profileName, modelId, setIsCa
         mediaRecorder.start();
         mediaRecorderRef.current = mediaRecorder;
         setIsRecording(true);
-        console.log('Recording started');
+        console.log("Recording started");
       } catch (error) {
-        console.error('Microphone access denied or not supported', error);
-        alert('Microphone access denied or not supported');
+        console.error("Microphone access denied or not supported", error);
+        alert("Microphone access denied or not supported");
       }
     } else {
       handleMicRelease();
@@ -71,10 +85,13 @@ export default function CallScreen({ profileImage, profileName, modelId, setIsCa
   };
 
   const handleMicRelease = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state === "recording"
+    ) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      console.log('Recording stopped');
+      console.log("Recording stopped");
     }
   };
 
@@ -92,7 +109,7 @@ export default function CallScreen({ profileImage, profileName, modelId, setIsCa
         playAudio(audioUrl);
       }
     } catch (error) {
-      console.error('Error sending transcript to backend:', error);
+      console.error("Error sending transcript to backend:", error);
     }
   };
 
@@ -105,119 +122,160 @@ export default function CallScreen({ profileImage, profileName, modelId, setIsCa
     };
   };
 
-  const audioPlayAnimation = () => {
-    return isPlaying ? { animation: 'bob 1s infinite' } : {};
-  };
+  //   const audioPlayAnimation = () => {
+  //     return isPlaying ? { animation: "bob 1s infinite" } : {};
+  //   };
 
   return (
-    <div className="call-screen-container" style={styles.callScreenContainer}>
-      <div className="call-screen-header" style={styles.callScreenHeader}>
-        Audio chat with {profileName}
+    <div
+      className="call-screen-container"
+      style={{
+        ...styles.callScreenContainer,
+        backgroundImage: `url(${profileImage})`,
+      }}
+    >
+      <div className="topContainer" style={styles.topContainer}>
+        <div className="profile-name-bubble" style={styles.profileNameBubble}>
+          {profileName}
+        </div>
+        <div
+          className="end-call-button"
+          style={styles.endCallButton}
+          onMouseDown={() => setIsCalling(false)}
+        >
+          X
+        </div>
       </div>
       <div className="call-screen-body" style={styles.callScreenBody}>
-        <img
-          src={profileImage}
-          alt={profileName}
-          style={{ ...styles.profileImage, ...audioPlayAnimation() }}
-        />
         <div className="mic-container" style={styles.micContainer}>
-          <button
+          <div
             className="mic-button"
             style={{
               ...styles.micButton,
-              backgroundColor: isRecording ? 'red' : '#fff',
-              animation: isRecording ? 'bob 1s infinite' : 'none',
+              backgroundColor: isRecording ? "red" : "rgba(0,0,0,0.3)",
+              animation: isRecording ? "bob 1s infinite" : "none",
             }}
-            onClick={handleMicPress}
-          >
-            <Icon icon={pinkMicrophoneIcon} style={styles.pinkMicrophoneIcon} />
-          </button>
-          <p style={styles.micText}>
-            {isRecording ? 'Tap to stop speaking' : 'Tap to speak'}
-          </p>
+            onMouseDown={handleMicPress}
+            onMouseUp={handleMicRelease}
+            onTouchStart={handleMicPress}
+            onTouchEnd={handleMicRelease}
+          ></div>
+          <div>
+            <div className="transcription-box" style={styles.transcriptionBox}>
+              <p style={styles.transcriptionText}>
+                {transcription ? transcription : "Hii, say something"}
+              </p>
+            </div>
+          </div>
         </div>
-        <button
-        className="end-call-button"
-        style={styles.endCallButton}
-        onMouseDown={() => setIsCalling(false)}
-      >
-        End Call
-      </button>
+        <div />
       </div>
-     
     </div>
   );
 }
 
 const styles = {
   callScreenContainer: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'space-between' as const,
-    width: '80%',
-    height: '100%',
-    backgroundColor: '#6a1b9a',
-    color: '#fff',
-    padding: '20px',
-    borderRadius: '10px',
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    width: "50%",
+    height: "60%",
+    backgroundSize: "cover",
+    backgroundPosition: "top",
+    color: "#fff",
+    padding: "20px",
+    borderRadius: "10px",
+    position: "relative" as const,
   },
-  callScreenHeader: {
-    fontSize: '1.2em',
-    fontWeight: 'bold' as const,
+  topContainer: {
+    display: "flex",
+  },
+  profileNameBubble: {
+    position: "absolute" as const,
+    top: "10px",
+    left: "10px", // changed from left to right
+    // backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: "10px 20px",
+    borderRadius: "20px",
+    fontSize: "1.2em",
+    fontWeight: "bold" as const,
+    color: "#fff",
+    boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
+    background: "rgba(0,0,0,0.5)",
   },
   callScreenBody: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center' as const,
-  },
-  profileImage: {
-    width: 'auto',
-    height: '27%',
-    borderRadius: '50%',
-    marginBottom: '20px',
-    objectFit: 'cover',
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center" as const,
+    height: "100%",
   },
   micContainer: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center' as const,
+    position: "absolute" as const,
+    bottom: "0",
+    left: "0",
+    right: "0",
+    display: "flex",
+    flexDirection: "column" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
+    background: "rgba(0,0,0,0)",
+    border: "none",
+    borderRadius: "30px",
+    padding: "5px 10px 5px 10px",
   },
   micButton: {
-    backgroundColor: '#fff',
-    border: 'none',
-    borderRadius: '50%',
-    width: '60px',
-    height: '60px',
-    display: 'flex',
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    marginBottom: '10px',
-  },
-  pinkMicrophoneIcon: {
-    fontSize: '2em',
-    color: '#6a1b9a',
+    border: "none",
+    borderRadius: "20px",
+    width: "60px",
+    height: "60px",
+    display: "flex",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    backgroundImage: `url(${mic})`,
+    backgroundSize: "fit",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "center",
+    // boxShadow: "0px 0px 10px rgba(0,0,0,0.5)"
   },
   micText: {
-    fontSize: '0.9em',
+    fontSize: "0.9em",
+    marginLeft: "10px",
   },
   endCallButton: {
-    backgroundColor: 'red',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '5px',
-    padding: '10px 20px',
-    fontSize: '1em',
-    cursor: 'pointer',
-    marginTop: '20px',
+    position: "absolute" as const,
+    top: "10px",
+    right: "10px", // changed from left to right
+    // backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: "5px 20px",
+    borderRadius: "20px",
+    fontSize: "1.6em",
+    color: "#fff",
+    boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
+    background: "rgba(0,0,0,0.5)",
+  },
+  transcriptionBox: {
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: "10px",
+    padding: "10px",
+    width: "100%",
+    marginTop:"10px"
+  },
+  transcriptionText: {
+    fontSize: "1em",
+    color: "#fff",
   },
 };
 
 // Add CSS keyframes for bob animation
 const styleSheet = document.styleSheets[0];
-styleSheet.insertRule(`
+styleSheet.insertRule(
+  `
   @keyframes bob {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.1); }
   }
-`, styleSheet.cssRules.length);
+`,
+  styleSheet.cssRules.length
+);
