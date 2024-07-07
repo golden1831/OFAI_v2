@@ -3,6 +3,8 @@ import mic from "../../assets/icons/mic.svg";
 import { useSendMessageMutation } from "../../Navigation/redux/apis/messageApi";
 import { MessageMode } from "../../types/message.types";
 import { useWeb3Auth } from "../../providers/Wallet";
+import StyledText from "./messages/StyledText";
+import { clsx } from "clsx";
 
 interface CallScreenProps {
   profileImage: string;
@@ -18,12 +20,25 @@ export default function CallScreen({
   setIsCalling,
 }: CallScreenProps) {
   const [isRecording, setIsRecording] = useState(false);
-  const [transcription, setTranscription] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
+  const [content, setContent] = useState("Hii!");
+  const [isTyping, setIsTyping] = useState(false);
   const [sendMessageMutation] = useSendMessageMutation();
   const { headers } = useWeb3Auth();
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+
+  const bubbleStyle =
+    "w-full word-wrap-break min-w-20 whitespace-break-spaces relative p-3 pb-2 rounded-2xl md:max-w-md border-white text-white bg-[#56265066] backdrop-blur-lg opacity-0 fadesIn";
+
+  const micContainer = `
+    absolute bottom-0 left-1/2 right-0 transform -translate-x-1/2 
+    flex flex-col justify-between items-center 
+    bg-black/20 border-none rounded-2xl 
+    p-2.5 overflow-hidden whitespace-nowrap text-ellipsis 
+    w-[80%] 
+    md:w-[60%] md:left-1/2 md:transform md:-translate-x-1/2 md:rounded-2xl
+  `;
 
   const handleMicPress = async () => {
     if (!isRecording) {
@@ -41,6 +56,7 @@ export default function CallScreen({
             formData.append("file", audioBlob);
 
             try {
+              setIsTyping(true); // Set typing status to true
               const response = await fetch(
                 "https://api.deepgram.com/v1/listen",
                 {
@@ -59,11 +75,12 @@ export default function CallScreen({
               const transcript =
                 result.results.channels[0].alternatives[0].transcript;
               if (transcript) {
-                setTranscription(transcript);
                 await sendTranscriptToBackend(transcript);
               }
             } catch (error) {
               console.error("Error transcribing audio:", error);
+            } finally {
+              setIsTyping(false); // Set typing status to false
             }
           }
         };
@@ -100,7 +117,7 @@ export default function CallScreen({
         mode: MessageMode.audio,
         headers,
       }).unwrap();
-
+      setContent(response.message);
       const audioUrl = response.voicecontenturl; // Assume the backend response includes the audio URL
       if (audioUrl) {
         playAudio(audioUrl);
@@ -119,7 +136,8 @@ export default function CallScreen({
     };
   };
 
-  const micAnimationStyle = isRecording || isPlaying ? { animation: "bob 1s infinite" } : {};
+  const micAnimationStyle =
+    isRecording || isPlaying ? { animation: "bob 1s infinite" } : {};
 
   return (
     <div
@@ -142,7 +160,7 @@ export default function CallScreen({
         </div>
       </div>
       <div className="call-screen-body" style={styles.callScreenBody}>
-        <div className="mic-container" style={styles.micContainer}>
+        <div className={clsx(micContainer.trim().split(/\s+/))}>
           <div
             className="mic-button"
             style={{
@@ -155,12 +173,14 @@ export default function CallScreen({
             onTouchStart={handleMicPress}
             onTouchEnd={handleMicRelease}
           ></div>
-          <div>
-            <div className="transcription-box" style={styles.transcriptionBox}>
-              <p style={styles.transcriptionText}>
-                {transcription ? transcription : "Hii, say something"}
-              </p>
-            </div>
+          <div className={clsx("flex flex-col", bubbleStyle)}>
+            <span className="font-normal break-words text-white">
+              {isTyping ? (
+                <span>{profileName} is typing...</span>
+              ) : (
+                <StyledText text={content} isTextStreaming={true} />
+              )}
+            </span>
           </div>
         </div>
         <div />
@@ -208,22 +228,34 @@ const styles = {
   micContainer: {
     position: "absolute" as const,
     bottom: "0",
-    left: "0",
+    left: "50%",
     right: "0",
+    transform: "translate(-50%)",
     display: "flex",
     flexDirection: "column" as const,
     justifyContent: "space-between" as const,
     alignItems: "center" as const,
-    background: "rgba(0,0,0,0)",
+    background: "rgba(0,0,0,0.2)",
     border: "none",
     borderRadius: "30px",
     padding: "5px 10px 5px 10px",
+    overflow: "hidden" as const,
+    whiteSpace: "nowrap" as const,
+    textOverflow: "ellipsis" as const,
+    width: "auto", // Default width for larger screens
+    "@media (max-width: 768px)": {
+      width: "100%", // Full width on mobile devices
+      left: "0", // Adjust the left position to 0 for mobile
+      transform: "none", // Remove translate for mobile
+      borderRadius: "0", // Adjust border-radius if needed for mobile
+    },
   },
   micButton: {
     border: "none",
     borderRadius: "20px",
-    width: "60px",
-    height: "60px",
+    width: "99%",
+    height: "7vh",
+    marginBottom: "10px",
     display: "flex",
     alignItems: "center" as const,
     justifyContent: "center" as const,
@@ -231,7 +263,7 @@ const styles = {
     backgroundSize: "fit",
     backgroundRepeat: "no-repeat",
     backgroundPosition: "center",
-    cursor: 'pointer',
+    cursor: "pointer",
   },
   micText: {
     fontSize: "0.9em",
@@ -247,7 +279,7 @@ const styles = {
     color: "#fff",
     boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
     background: "rgba(0,0,0,0.5)",
-    cursor: 'pointer',
+    cursor: "pointer",
   },
   transcriptionBox: {
     backgroundColor: "rgba(0,0,0,0.4)",
@@ -260,6 +292,22 @@ const styles = {
     fontSize: "1em",
     color: "#fff",
   },
+  //   bubbleStyle: {
+  //     wordWrap: "break",
+  //     minWidth: "20px",
+  //     whitespace: "break-spaces",
+  //     position: "relative",
+  //     padding: "3px",
+  //     paddingBottom: "2px",
+  //     borderRadius: "2xl",
+  //     maxWidth: "md",
+  //     border: "1px solid #fff",
+  //     color: "#fff",
+  //     backgroundColor: "#56265066",
+  //     backdropFilter: "blur-lg",
+  //     opacity: 0,
+  //     transition: "opacity 0.5s ease-in-out",
+  //   },
 };
 
 // Add CSS keyframes for bob animation
