@@ -20,9 +20,9 @@ export default function CallScreen({
   setIsCalling,
 }: CallScreenProps) {
   const [isRecording, setIsRecording] = useState(false);
-  //   const [transcription, setTranscription] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [content, setContent] = useState("Hii!");
+  const [isTyping, setIsTyping] = useState(false);
   const [sendMessageMutation] = useSendMessageMutation();
   const { headers } = useWeb3Auth();
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -31,14 +31,14 @@ export default function CallScreen({
   const bubbleStyle =
     "w-full word-wrap-break min-w-20 whitespace-break-spaces relative p-3 pb-2 rounded-2xl md:max-w-md border-white text-white bg-[#56265066] backdrop-blur-lg opacity-0 fadesIn";
 
-    const micContainer = `
-  absolute bottom-0 left-1/2 right-0 transform -translate-x-1/2 
-  flex flex-col justify-between items-center 
-  bg-black/20 border-none rounded-2xl 
-  p-2.5 overflow-hidden whitespace-nowrap text-ellipsis 
-  w-[80%] 
-  md:w-[60%] md:left-1/2 md:transform md:-translate-x-1/2 md:rounded-2xl
-`;
+  const micContainer = `
+    absolute bottom-0 left-1/2 right-0 transform -translate-x-1/2 
+    flex flex-col justify-between items-center 
+    bg-black/20 border-none rounded-2xl 
+    p-2.5 overflow-hidden whitespace-nowrap text-ellipsis 
+    w-[80%] 
+    md:w-[60%] md:left-1/2 md:transform md:-translate-x-1/2 md:rounded-2xl
+  `;
 
   const handleMicPress = async () => {
     if (!isRecording) {
@@ -56,6 +56,7 @@ export default function CallScreen({
             formData.append("file", audioBlob);
 
             try {
+              setIsTyping(true); // Set typing status to true
               const response = await fetch(
                 "https://api.deepgram.com/v1/listen",
                 {
@@ -74,11 +75,12 @@ export default function CallScreen({
               const transcript =
                 result.results.channels[0].alternatives[0].transcript;
               if (transcript) {
-                // setTranscription(transcript);
                 await sendTranscriptToBackend(transcript);
               }
             } catch (error) {
               console.error("Error transcribing audio:", error);
+            } finally {
+              setIsTyping(false); // Set typing status to false
             }
           }
         };
@@ -173,11 +175,15 @@ export default function CallScreen({
           ></div>
           <div className={clsx("flex flex-col", bubbleStyle)}>
             <span className="font-normal break-words text-white">
-              <StyledText text={content} isTextStreaming={true} />
+              {isTyping ? (
+                <span>{profileName} is typing...</span>
+              ) : (
+                <StyledText text={content} isTextStreaming={true} />
+              )}
             </span>
           </div>
         </div>
-        <div/>
+        <div />
       </div>
     </div>
   );
