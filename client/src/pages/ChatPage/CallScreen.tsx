@@ -176,7 +176,7 @@ export default function CallScreen({
           <div className={clsx("flex flex-col", bubbleStyle)}>
             <span className="font-normal break-words text-white">
               {isTyping ? (
-                <span>{profileName} is typing...</span>
+                <span>{profileName} is recording...</span>
               ) : (
                 <StyledText text={content} isTextStreaming={true} />
               )}
