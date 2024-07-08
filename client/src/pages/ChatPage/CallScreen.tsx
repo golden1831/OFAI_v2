@@ -4,7 +4,7 @@ import replay from "../../assets/icons/replay.svg";
 import { useSendMessageMutation } from "../../Navigation/redux/apis/messageApi";
 import { MessageMode } from "../../types/message.types";
 import { useWeb3Auth } from "../../providers/Wallet";
-import {pinkMicrophoneIcon} from "../../assets/icons/pink"
+import { pinkMicrophoneIcon } from "../../assets/icons/pink";
 import { clsx } from "clsx";
 
 interface CallScreenProps {
@@ -144,64 +144,63 @@ export default function CallScreen({
   const micAnimationStyle =
     isRecording || isPlaying ? { animation: "bob 1s infinite" } : {};
 
-    return (
-      <div
-        className={clsx("flex flex-col items-center justify-center h-[65%] bg-cover bg-top text-white p-5 rounded-lg relative w-[85%] md:w-[40%] md:h-[75%]")}
-        style={{
-          backgroundImage: `url(${profileImage})`,
-        }}
-      >
-        <div className="topContainer" style={styles.topContainer}>
-          <div className="profile-name-bubble" style={styles.profileNameBubble}>
-            {profileName}
-          </div>
-          <div
-            className="end-call-button"
-            style={styles.endCallButton}
-            onMouseDown={() => setIsCalling(false)}
-          >
-            X
-          </div>
+  return (
+    <div
+      className={clsx("flex flex-col items-center justify-center h-[65%] bg-cover bg-top text-white p-5 rounded-lg relative w-[85%] md:w-[40%] md:h-[75%]")}
+      style={{
+        backgroundImage: `url(${profileImage})`,
+      }}
+    >
+      <div className="topContainer" style={styles.topContainer}>
+        <div className="profile-name-bubble" style={styles.profileNameBubble}>
+          {profileName}
         </div>
-        <div className="call-screen-body" style={styles.callScreenBody}>
-          <div className={clsx(micContainer.trim().split(/\s+/))}>
-            <div
-              className="mic-button"
-              style={{
-                ...styles.micButton,
-                backgroundColor: isRecording ? "transparent" : "rgba(0,0,0,0.3)",
-                backgroundImage: isRecording ? "linear-gradient(90deg, #BB38DC 0%, #FF00BF 100%)" : "none",
-                ...micAnimationStyle,
-              }}
-              onMouseDown={handleMicPress}
-              onMouseUp={handleMicRelease}
-              onTouchStart={handleMicPress}
-              onTouchEnd={handleMicRelease}
-            ><img
-            src={pinkMicrophoneIcon}
-            alt="mic"
-            style={styles.micIcon}
-          /></div>
-            <div className={clsx("flex flex-col")}>
-              <span className={clsx("font-normal break-words text-white")}>
-                {isTyping ? (
-                  <span>{profileName} is recording...</span>
-                ) : (
-                  <span>Tap to speak.</span>
-                )}
-              </span>
-            </div>
-          </div>
-          <div
-            className="replay-button"
-            style={styles.replayButton}
-            onClick={replayAudio}
-          ></div>
-          <div />
+        <div
+          className="end-call-button"
+          style={styles.endCallButton}
+          onMouseDown={() => setIsCalling(false)}
+        >
+          X
         </div>
       </div>
-    );
-  }
+      <div className="call-screen-body" style={styles.callScreenBody}>
+        <div className={clsx(micContainer.trim().split(/\s+/))}>
+          <div
+            className="mic-button"
+            style={{
+              ...styles.micButton,
+              backgroundColor: isRecording ? "transparent" : "rgba(0,0,0,0.3)",
+              backgroundImage: isRecording ? "linear-gradient(90deg, #BB38DC 0%, #FF00BF 100%)" : "none",
+              ...micAnimationStyle,
+            }}
+            onClick={handleMicPress}
+          >
+            <img
+              src={pinkMicrophoneIcon}
+              alt="mic"
+              style={styles.micIcon}
+            />
+          </div>
+          <div className={clsx("flex flex-col")}>
+            <span className={clsx("font-normal break-words text-white")}>
+              {isTyping ? (
+                <span>{profileName} is recording...</span>
+              ) : (
+                <span>{isRecording ? "Tap to stop recording." : "Tap to start recording."}</span>
+              )}
+            </span>
+          </div>
+        </div>
+        <div
+          className="replay-button"
+          style={styles.replayButton}
+          onClick={replayAudio}
+        ></div>
+        <div />
+      </div>
+    </div>
+  );
+}
     
     const styles = {
       // callScreenContainer: {
