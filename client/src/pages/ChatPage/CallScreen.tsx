@@ -146,18 +146,18 @@ export default function CallScreen({
 
   return (
     <div
-      className={clsx("flex flex-col items-center justify-center h-[65%] bg-cover bg-top text-white p-5 rounded-lg relative w-[85%] md:w-[40%] md:h-[75%]")}
+      className={clsx(
+        "flex flex-col items-center justify-center h-[65%] bg-cover bg-top text-white p-5 rounded-lg relative w-[85%] md:w-[40%] md:h-[75%]"
+      )}
       style={{
         backgroundImage: `url(${profileImage})`,
       }}
     >
       <div className="topContainer" style={styles.topContainer}>
-      <div className="profile-name-bubble" style={styles.profileNameBubble}>
-          <img
-            src={profileImage}
-            alt="profile"
-            style={styles.profileImage}
-          />
+        <div className="profile-name-bubble" style={styles.profileNameBubble}>
+          <div style={styles.profileImageWrapper}>
+            <img src={profileImage} alt="profile" style={styles.profileImage} />
+          </div>
           <span>{profileName}</span>
           <div style={styles.tick} />
         </div>
@@ -175,17 +175,17 @@ export default function CallScreen({
             className="mic-button"
             style={{
               ...styles.micButton,
-              backgroundColor: isRecording || isPlaying ? "transparent" : "rgba(0,0,0,0.3)",
-              backgroundImage: isRecording || isPlaying ? "linear-gradient(90deg, #BB38DC 0%, #FF00BF 100%)" : "none",
+              backgroundColor:
+                isRecording || isPlaying ? "transparent" : "rgba(0,0,0,0.3)",
+              backgroundImage:
+                isRecording || isPlaying
+                  ? "linear-gradient(90deg, #BB38DC 0%, #FF00BF 100%)"
+                  : "none",
               ...micAnimationStyle,
             }}
             onClick={handleMicPress}
           >
-            <img
-              src={pinkMicrophoneIcon}
-              alt="mic"
-              style={styles.micIcon}
-            />
+            <img src={pinkMicrophoneIcon} alt="mic" style={styles.micIcon} />
           </div>
           <div className={clsx("flex flex-col")}>
             <span className={clsx("font-normal break-words text-white")}>
@@ -207,151 +207,159 @@ export default function CallScreen({
     </div>
   );
 }
-    
-    const styles = {
-      // callScreenContainer: {
-      //   display: "flex",
-      //   flexDirection: "column" as const,
-      //   alignItems: "center" as const,
-      //   justifyContent: "center" as const,
-      //   width: "50%", // Default width for desktop
-      //   height: "60%",
-      //   backgroundSize: "cover",
-      //   backgroundPosition: "top",
-      //   color: "#fff",
-      //   padding: "20px",
-      //   borderRadius: "10px",
-      //   position: "relative" as const,
-      //   '@media (max-width: 768px)': { // Media query for mobile devices
-      //     width: "90%", // Adjusted width for mobile
-      //   },
-      // },
-      topContainer: {
-        display: "flex",
-      },
-      profileNameBubble: {
-        position: "absWWolute" as const,
-        top: "10px",
-        left: "10px",
-        padding: "7px 10px",
-        borderRadius: "20px",
-        fontSize: "1em",
-        fontWeight: "200",
-        color: "#fff",
-        background: "rgba(0,0,0,0.1)",
-        display: "flex",
-        alignItems: "center",
-        '@media (max-width: 768px)': { // Media query for mobile devices
-          width: "80%", // Adjusted width for mobile
-        },
-      },
-      callScreenBody: {
-        display: "flex",
-        flexDirection: "column" as const,
-        alignItems: "center" as const,
-        height: "100%",
-      },
-      profileImage: {
-        width: "30px",
-        height: "30px",
-        borderRadius: "50%",
-        marginRight: "2px",
-        objectFit: "cover",
-        objectPosition: "center top"
-      },
-      tick: {
-        width: "12px",
-        height: "12px",
-        borderRadius: "50%",
-        backgroundImage: "linear-gradient(90deg, #BB38DC 0%, #FF00BF 100%)",
-        marginLeft: "10px",
-      },
-      micButton: {
-        border: "none",
-        borderRadius: "50%", // Add this line
-        width: "70px",
-        height: "70px",
-        marginBottom: "10px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundImage: `url(${mic})`,
-        backgroundSize: "fit",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center",
-        cursor: "pointer",
-      },
-      micIcon: {
-        width: "40%",
-        height: "40%",
-        objectFit: "contain" as const,
-      },
-      micText: {
-        fontSize: "0.9em",
-        marginLeft: "10px",
-      },
-      endCallButton: {
-        position: "absolute" as const,
-        top: "10px",
-        right: "10px",
-        width: "40px", // Make it a circle
-        height: "40px", // Make it a circle
-        padding: "0", // Remove padding to avoid affecting the shape
-        borderRadius: "20px", // Full circle
-        fontSize: "1.3em",
-        fontWeight: "300",
-        color: "#fff",
-        // boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
-        background: "rgba(0,0,0,0.1)",
-        display: "flex", // Use flexbox to center the text
-        alignItems: "center", // Center vertically
-        justifyContent: "center", // Center horizontally
-        cursor: "pointer",
-        '@media (max-width: 768px)': { // Media query for mobile devices
-          width: "40px", // Adjusted width for mobile
-          height: "40px", // Adjusted height for mobile
-        },
-      },      
-      replayButton: {
-        position: "absolute" as const,
-        bottom: "10px",
-        right: "10px",
-        border: "none",
-        borderRadius: "50%",
-        width: "50px",
-        height: "50px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundImage: `url(${replay})`,
-        backgroundSize: "fit",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center",
-        cursor: "pointer",
-      },
-      transcriptionBox: {
-        backgroundColor: "rgba(0,0,0,0.4)",
-        borderRadius: "10px",
-        padding: "10px",
-        width: "100%",
-        marginTop: "10px",
-      },
-      transcriptionText: {
-        fontSize: "1em",
-        color: "#fff",
-      }
-    };
-    
-    // Add CSS keyframes for bob animation
-    const styleSheet = document.styleSheets[0];
-    styleSheet.insertRule(
-      `
+
+const styles = {
+  // callScreenContainer: {
+  //   display: "flex",
+  //   flexDirection: "column" as const,
+  //   alignItems: "center" as const,
+  //   justifyContent: "center" as const,
+  //   width: "50%", // Default width for desktop
+  //   height: "60%",
+  //   backgroundSize: "cover",
+  //   backgroundPosition: "top",
+  //   color: "#fff",
+  //   padding: "20px",
+  //   borderRadius: "10px",
+  //   position: "relative" as const,
+  //   '@media (max-width: 768px)': { // Media query for mobile devices
+  //     width: "90%", // Adjusted width for mobile
+  //   },
+  // },
+  topContainer: {
+    display: "flex",
+  },
+  profileNameBubble: {
+    position: "absolute" as const,
+    top: "10px",
+    left: "10px",
+    padding: "7px 10px",
+    borderRadius: "20px",
+    fontSize: "1em",
+    fontWeight: "200",
+    color: "#fff",
+    background: "rgba(0,0,0,0.3)",
+    display: "flex",
+    alignItems: "center",
+    "@media (max-width: 768px)": {
+      // Media query for mobile devices
+      width: "80%", // Adjusted width for mobile
+    },
+  },
+  profileImageWrapper: {
+    width: "30px",
+    height: "30px",
+    borderRadius: "50%",
+    overflow: "hidden",
+    marginRight: "2px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  profileImage: {
+    height: "130%",
+    width: "100%",
+    transform: "translate(1%, 70%) scale(2.3)", // Adjust the scale value to zoom in or out
+    objectFit: "cover",
+  },
+  tick: {
+    width: "12px",
+    height: "12px",
+    borderRadius: "50%",
+    backgroundImage: "linear-gradient(90deg, #BB38DC 0%, #FF00BF 100%)",
+    marginLeft: "10px",
+  },
+  callScreenBody: {
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center" as const,
+    height: "100%",
+  },
+  micButton: {
+    border: "none",
+    borderRadius: "50%", // Add this line
+    width: "70px",
+    height: "70px",
+    marginBottom: "10px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundImage: `url(${mic})`,
+    backgroundSize: "fit",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "center",
+    cursor: "pointer",
+  },
+  micIcon: {
+    width: "40%",
+    height: "40%",
+    objectFit: "contain" as const,
+  },
+  micText: {
+    fontSize: "0.9em",
+    marginLeft: "10px",
+  },
+  endCallButton: {
+    position: "absolute" as const,
+    top: "10px",
+    right: "10px",
+    width: "40px", // Make it a circle
+    height: "40px", // Make it a circle
+    padding: "0", // Remove padding to avoid affecting the shape
+    borderRadius: "20px", // Full circle
+    fontSize: "1.3em",
+    fontWeight: "300",
+    color: "#fff",
+    // boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
+    background: "rgba(0,0,0,0.1)",
+    display: "flex", // Use flexbox to center the text
+    alignItems: "center", // Center vertically
+    justifyContent: "center", // Center horizontally
+    cursor: "pointer",
+    "@media (max-width: 768px)": {
+      // Media query for mobile devices
+      width: "40px", // Adjusted width for mobile
+      height: "40px", // Adjusted height for mobile
+    },
+  },
+  replayButton: {
+    position: "absolute" as const,
+    bottom: "10px",
+    right: "10px",
+    border: "none",
+    borderRadius: "50%",
+    width: "50px",
+    height: "50px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundImage: `url(${replay})`,
+    backgroundSize: "fit",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "center",
+    cursor: "pointer",
+  },
+  transcriptionBox: {
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: "10px",
+    padding: "10px",
+    width: "100%",
+    marginTop: "10px",
+  },
+  transcriptionText: {
+    fontSize: "1em",
+    color: "#fff",
+  },
+};
+
+// Add CSS keyframes for bob animation
+const styleSheet = document.styleSheets[0];
+styleSheet.insertRule(
+  `
       @keyframes bob {
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.1); }
       }
     `,
-      styleSheet.cssRules.length
-    );
-    
-  
+  styleSheet.cssRules.length
+);
