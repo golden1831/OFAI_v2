@@ -192,7 +192,7 @@ export default function CallScreen({
               {isTyping ? (
                 <span>{profileName} is recording...</span>
               ) : (
-                <span>{isRecording ? "Tap to stop recording." : "Tap to start recording."}</span>
+                <span>{isRecording ? "Tap to finish." : "Tap to speak."}</span>
               )}
             </span>
           </div>
@@ -230,7 +230,7 @@ export default function CallScreen({
         display: "flex",
       },
       profileNameBubble: {
-        position: "absolute" as const,
+        position: "absWWolute" as const,
         top: "10px",
         left: "10px",
         padding: "7px 10px",
@@ -256,6 +256,8 @@ export default function CallScreen({
         height: "30px",
         borderRadius: "50%",
         marginRight: "2px",
+        objectFit: "cover",
+        objectPosition: "center top"
       },
       tick: {
         width: "12px",
