@@ -122,7 +122,7 @@ export default function Form({
             <img
               src={mic}
               className={clsx(
-                "ml-2 mr-0.1 cursor-pointer transition-transform duration-200 size-6",
+                "ml-1 mr-0.1 cursor-pointer transition-transform duration-200 size-6",
 
               )}
             />
@@ -134,7 +134,7 @@ export default function Form({
                 <img
                   src={togglePicOptions ? twinkleIcon : imageIcon}
                   onClick={() => setTogglePicOptions((prev) => !prev)}
-                  className="size-5 ml-2 mr-1.5 cursor-pointer"
+                  className="size-5 ml-0.1 mr-1.5 cursor-pointer"
                 />
               </div>
             ) : (
