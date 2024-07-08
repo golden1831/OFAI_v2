@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useState, useRef } from "react";
 import mic from "../../assets/icons/mic.svg";
+import replay from "../../assets/icons/replay.svg";
 import { useSendMessageMutation } from "../../Navigation/redux/apis/messageApi";
 import { MessageMode } from "../../types/message.types";
 import { useWeb3Auth } from "../../providers/Wallet";
@@ -23,13 +24,11 @@ export default function CallScreen({
   const [isPlaying, setIsPlaying] = useState(false);
   const [content, setContent] = useState("Hii!");
   const [isTyping, setIsTyping] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [sendMessageMutation] = useSendMessageMutation();
   const { headers } = useWeb3Auth();
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-
-  // const bubbleStyle =
-    "w-full word-wrap-break min-w-20 whitespace-break-spaces relative p-3 pb-2 rounded-2xl md:max-w-md border-white text-white bg-[#56265066] backdrop-blur-lg opacity-0 fadesIn";
 
   const micContainer = `
   absolute bottom-0 left-1/2 right-0 transform -translate-x-1/2 
@@ -37,7 +36,7 @@ export default function CallScreen({
   p-2.5 overflow-hidden whitespace-nowrap text-ellipsis 
   w-[80%] 
   md:w-[50%] md:left-1/2 md:transform md:-translate-x-1/2 md:rounded-2xl
-`;
+  `;
 
   const handleMicPress = async () => {
     if (!isRecording) {
@@ -119,6 +118,7 @@ export default function CallScreen({
       setContent(response.message);
       const audioUrl = response.voicecontenturl; // Assume the backend response includes the audio URL
       if (audioUrl) {
+        setAudioUrl(audioUrl);
         playAudio(audioUrl);
       }
     } catch (error) {
@@ -133,6 +133,12 @@ export default function CallScreen({
     audio.onended = () => {
       setIsPlaying(false);
     };
+  };
+
+  const replayAudio = () => {
+    if (audioUrl) {
+      playAudio(audioUrl);
+    }
   };
 
   const micAnimationStyle =
@@ -181,109 +187,132 @@ export default function CallScreen({
               </span>
             </div>
           </div>
+          <div
+            className="replay-button"
+            style={styles.replayButton}
+            onClick={replayAudio}
+          ></div>
           <div />
         </div>
       </div>
     );
   }
-  
-  const styles = {
-    callScreenContainer: {
-      display: "flex",
-      flexDirection: "column" as const,
-      alignItems: "center" as const,
-      justifyContent: "center" as const,
-      width: "50%", // Default width for desktop
-      height: "60%",
-      backgroundSize: "cover",
-      backgroundPosition: "top",
-      color: "#fff",
-      padding: "20px",
-      borderRadius: "10px",
-      position: "relative" as const,
-      '@media (max-width: 768px)': { // Media query for mobile devices
-        width: "90%", // Adjusted width for mobile
+    
+    const styles = {
+      callScreenContainer: {
+        display: "flex",
+        flexDirection: "column" as const,
+        alignItems: "center" as const,
+        justifyContent: "center" as const,
+        width: "50%", // Default width for desktop
+        height: "60%",
+        backgroundSize: "cover",
+        backgroundPosition: "top",
+        color: "#fff",
+        padding: "20px",
+        borderRadius: "10px",
+        position: "relative" as const,
+        '@media (max-width: 768px)': { // Media query for mobile devices
+          width: "90%", // Adjusted width for mobile
+        },
       },
-    },
-    topContainer: {
-      display: "flex",
-    },
-    profileNameBubble: {
-      position: "absolute" as const,
-      top: "10px",
-      left: "10px",
-      padding: "10px 20px",
-      borderRadius: "20px",
-      fontSize: "1.2em",
-      color: "#fff",
-      boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
-      background: "rgba(0,0,0,0.5)",
-      '@media (max-width: 768px)': { // Media query for mobile devices
-        width: "80%", // Adjusted width for mobile
+      topContainer: {
+        display: "flex",
       },
-    },
-    callScreenBody: {
-      display: "flex",
-      flexDirection: "column" as const,
-      alignItems: "center" as const,
-      height: "100%",
-    },
-    micButton: {
-      border: "none",
-      borderRadius: "50%", // Add this line
-      width: "70px",
-      height: "70px",
-      marginBottom: "10px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundImage: `url(${mic})`,
-      backgroundSize: "fit",
-      backgroundRepeat: "no-repeat",
-      backgroundPosition: "center",
-      cursor: "pointer",
-    },
-    micText: {
-      fontSize: "0.9em",
-      marginLeft: "10px",
-    },
-    endCallButton: {
-      position: "absolute" as const,
-      top: "10px",
-      right: "10px",
-      padding: "5px 20px",
-      borderRadius: "20px",
-      fontSize: "1.6em",
-      color: "#fff",
-      boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
-      background: "rgba(0,0,0,0.5)",
-      cursor: "pointer",
-      '@media (max-width: 768px)': { // Media query for mobile devices
-        width: "80%", // Adjusted width for mobile
+      profileNameBubble: {
+        position: "absolute" as const,
+        top: "10px",
+        left: "10px",
+        padding: "10px 20px",
+        borderRadius: "20px",
+        fontSize: "1.2em",
+        color: "#fff",
+        boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
+        background: "rgba(0,0,0,0.5)",
+        '@media (max-width: 768px)': { // Media query for mobile devices
+          width: "80%", // Adjusted width for mobile
+        },
       },
-    },
-    transcriptionBox: {
-      backgroundColor: "rgba(0,0,0,0.4)",
-      borderRadius: "10px",
-      padding: "10px",
-      width: "100%",
-      marginTop: "10px",
-    },
-    transcriptionText: {
-      fontSize: "1em",
-      color: "#fff",
-    }
-  };
-  
-  // Add CSS keyframes for bob animation
-  const styleSheet = document.styleSheets[0];
-  styleSheet.insertRule(
-    `
-    @keyframes bob {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-  `,
-    styleSheet.cssRules.length
-  );
+      callScreenBody: {
+        display: "flex",
+        flexDirection: "column" as const,
+        alignItems: "center" as const,
+        height: "100%",
+      },
+      micButton: {
+        border: "none",
+        borderRadius: "50%", // Add this line
+        width: "70px",
+        height: "70px",
+        marginBottom: "10px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundImage: `url(${mic})`,
+        backgroundSize: "fit",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center",
+        cursor: "pointer",
+      },
+      micText: {
+        fontSize: "0.9em",
+        marginLeft: "10px",
+      },
+      endCallButton: {
+        position: "absolute" as const,
+        top: "10px",
+        right: "10px",
+        padding: "5px 20px",
+        borderRadius: "20px",
+        fontSize: "1.6em",
+        color: "#fff",
+        boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
+        background: "rgba(0,0,0,0.5)",
+        cursor: "pointer",
+        '@media (max-width: 768px)': { // Media query for mobile devices
+          width: "80%", // Adjusted width for mobile
+        },
+      },
+      replayButton: {
+        position: "absolute" as const,
+        bottom: "10px",
+        right: "10px",
+        border: "none",
+        borderRadius: "50%",
+        width: "70px",
+        height: "70px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundImage: `url(${replay})`,
+        backgroundSize: "fit",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center",
+        cursor: "pointer",
+      },
+      transcriptionBox: {
+        backgroundColor: "rgba(0,0,0,0.4)",
+        borderRadius: "10px",
+        padding: "10px",
+        width: "100%",
+        marginTop: "10px",
+      },
+      transcriptionText: {
+        fontSize: "1em",
+        color: "#fff",
+      }
+    };
+    
+    // Add CSS keyframes for bob animation
+    const styleSheet = document.styleSheets[0];
+    styleSheet.insertRule(
+      `
+      @keyframes bob {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+      }
+    `,
+      styleSheet.cssRules.length
+    );
+    
   
