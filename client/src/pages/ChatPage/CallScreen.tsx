@@ -4,7 +4,7 @@ import replay from "../../assets/icons/replay.svg";
 import { useSendMessageMutation } from "../../Navigation/redux/apis/messageApi";
 import { MessageMode } from "../../types/message.types";
 import { useWeb3Auth } from "../../providers/Wallet";
-import StyledText from "./messages/StyledText";
+import {pinkMicrophoneIcon} from "../../assets/icons/pink"
 import { clsx } from "clsx";
 
 interface CallScreenProps {
@@ -146,7 +146,7 @@ export default function CallScreen({
 
     return (
       <div
-        className={clsx("flex flex-col items-center justify-center h-3/5 bg-cover bg-top text-white p-5 rounded-lg relative w-[90%] md:w-1/2")}
+        className={clsx("flex flex-col items-center justify-center h-[65%] bg-cover bg-top text-white p-5 rounded-lg relative w-[85%] md:w-[40%] md:h-[75%]")}
         style={{
           backgroundImage: `url(${profileImage})`,
         }}
@@ -178,7 +178,7 @@ export default function CallScreen({
               onTouchStart={handleMicPress}
               onTouchEnd={handleMicRelease}
             ><img
-            src={mic}
+            src={pinkMicrophoneIcon}
             alt="mic"
             style={styles.micIcon}
           /></div>
@@ -187,7 +187,7 @@ export default function CallScreen({
                 {isTyping ? (
                   <span>{profileName} is recording...</span>
                 ) : (
-                  <span>Tap and hold to speak.</span>
+                  <span>Tap to speak.</span>
                 )}
               </span>
             </div>
@@ -204,23 +204,23 @@ export default function CallScreen({
   }
     
     const styles = {
-      callScreenContainer: {
-        display: "flex",
-        flexDirection: "column" as const,
-        alignItems: "center" as const,
-        justifyContent: "center" as const,
-        width: "50%", // Default width for desktop
-        height: "60%",
-        backgroundSize: "cover",
-        backgroundPosition: "top",
-        color: "#fff",
-        padding: "20px",
-        borderRadius: "10px",
-        position: "relative" as const,
-        '@media (max-width: 768px)': { // Media query for mobile devices
-          width: "90%", // Adjusted width for mobile
-        },
-      },
+      // callScreenContainer: {
+      //   display: "flex",
+      //   flexDirection: "column" as const,
+      //   alignItems: "center" as const,
+      //   justifyContent: "center" as const,
+      //   width: "50%", // Default width for desktop
+      //   height: "60%",
+      //   backgroundSize: "cover",
+      //   backgroundPosition: "top",
+      //   color: "#fff",
+      //   padding: "20px",
+      //   borderRadius: "10px",
+      //   position: "relative" as const,
+      //   '@media (max-width: 768px)': { // Media query for mobile devices
+      //     width: "90%", // Adjusted width for mobile
+      //   },
+      // },
       topContainer: {
         display: "flex",
       },
@@ -228,12 +228,13 @@ export default function CallScreen({
         position: "absolute" as const,
         top: "10px",
         left: "10px",
-        padding: "10px 20px",
+        padding: "7px 10px",
         borderRadius: "20px",
-        fontSize: "1.2em",
+        fontSize: "1em",
+        fontWeight: "200",
         color: "#fff",
-        boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
-        background: "rgba(0,0,0,0.5)",
+        // boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
+        background: "rgba(0,0,0,0.3)",
         '@media (max-width: 768px)': { // Media query for mobile devices
           width: "80%", // Adjusted width for mobile
         },
@@ -260,9 +261,9 @@ export default function CallScreen({
         cursor: "pointer",
       },
       micIcon: {
-        width: "30%",
-        height: "30%",
-        objectFit: "contain",
+        width: "40%",
+        height: "40%",
+        objectFit: "contain" as const,
       },
       micText: {
         fontSize: "0.9em",
@@ -272,25 +273,32 @@ export default function CallScreen({
         position: "absolute" as const,
         top: "10px",
         right: "10px",
-        padding: "5px 20px",
-        borderRadius: "20px",
-        fontSize: "1.6em",
+        width: "40px", // Make it a circle
+        height: "40px", // Make it a circle
+        padding: "0", // Remove padding to avoid affecting the shape
+        borderRadius: "20px", // Full circle
+        fontSize: "1.3em",
+        fontWeight: "300",
         color: "#fff",
-        boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
-        background: "rgba(0,0,0,0.5)",
+        // boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
+        background: "rgba(0,0,0,0.1)",
+        display: "flex", // Use flexbox to center the text
+        alignItems: "center", // Center vertically
+        justifyContent: "center", // Center horizontally
         cursor: "pointer",
         '@media (max-width: 768px)': { // Media query for mobile devices
-          width: "80%", // Adjusted width for mobile
+          width: "40px", // Adjusted width for mobile
+          height: "40px", // Adjusted height for mobile
         },
-      },
+      },      
       replayButton: {
         position: "absolute" as const,
         bottom: "10px",
         right: "10px",
         border: "none",
         borderRadius: "50%",
-        width: "70px",
-        height: "70px",
+        width: "50px",
+        height: "50px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
