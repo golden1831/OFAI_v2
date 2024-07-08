@@ -5,6 +5,7 @@ import {
   chat2Icon,
   pinkMicrophoneIcon,
 } from "../../../assets/icons/pink";
+import mic from "../../../assets/icons/mic.svg"
 import { Icon } from "@iconify/react/dist/iconify.js";
 import BubblesFormFooter from "./BubblesFormFooter";
 import { MessageMode } from "../../../types/message.types";
@@ -119,9 +120,9 @@ export default function Form({
             onMouseDown={handleMicPress}
           >
             <img
-              src={pinkMicrophoneIcon}
+              src={mic}
               className={clsx(
-                "ml-2 mr-1.5 cursor-pointer transition-transform duration-200 size-6",
+                "ml-2 mr-0.1 cursor-pointer transition-transform duration-200 size-6",
 
               )}
             />

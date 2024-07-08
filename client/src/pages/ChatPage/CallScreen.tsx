@@ -152,8 +152,14 @@ export default function CallScreen({
       }}
     >
       <div className="topContainer" style={styles.topContainer}>
-        <div className="profile-name-bubble" style={styles.profileNameBubble}>
-          {profileName}
+      <div className="profile-name-bubble" style={styles.profileNameBubble}>
+          <img
+            src={profileImage}
+            alt="profile"
+            style={styles.profileImage}
+          />
+          <span>{profileName}</span>
+          <div style={styles.tick} />
         </div>
         <div
           className="end-call-button"
@@ -232,8 +238,9 @@ export default function CallScreen({
         fontSize: "1em",
         fontWeight: "200",
         color: "#fff",
-        // boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
-        background: "rgba(0,0,0,0.3)",
+        background: "rgba(0,0,0,0.1)",
+        display: "flex",
+        alignItems: "center",
         '@media (max-width: 768px)': { // Media query for mobile devices
           width: "80%", // Adjusted width for mobile
         },
@@ -243,6 +250,19 @@ export default function CallScreen({
         flexDirection: "column" as const,
         alignItems: "center" as const,
         height: "100%",
+      },
+      profileImage: {
+        width: "30px",
+        height: "30px",
+        borderRadius: "50%",
+        marginRight: "2px",
+      },
+      tick: {
+        width: "12px",
+        height: "12px",
+        borderRadius: "50%",
+        backgroundImage: "linear-gradient(90deg, #BB38DC 0%, #FF00BF 100%)",
+        marginLeft: "10px",
       },
       micButton: {
         border: "none",
