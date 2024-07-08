@@ -169,8 +169,8 @@ export default function CallScreen({
             className="mic-button"
             style={{
               ...styles.micButton,
-              backgroundColor: isRecording ? "transparent" : "rgba(0,0,0,0.3)",
-              backgroundImage: isRecording ? "linear-gradient(90deg, #BB38DC 0%, #FF00BF 100%)" : "none",
+              backgroundColor: isRecording || isPlaying ? "transparent" : "rgba(0,0,0,0.3)",
+              backgroundImage: isRecording || isPlaying ? "linear-gradient(90deg, #BB38DC 0%, #FF00BF 100%)" : "none",
               ...micAnimationStyle,
             }}
             onClick={handleMicPress}
