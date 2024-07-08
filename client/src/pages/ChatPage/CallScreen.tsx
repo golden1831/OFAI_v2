@@ -169,14 +169,19 @@ export default function CallScreen({
               className="mic-button"
               style={{
                 ...styles.micButton,
-                backgroundColor: isRecording ? "rgba(85, 38, 6, 0.8)" : "rgba(0,0,0,0.3)",
+                backgroundColor: isRecording ? "transparent" : "rgba(0,0,0,0.3)",
+                backgroundImage: isRecording ? "linear-gradient(90deg, #BB38DC 0%, #FF00BF 100%)" : "none",
                 ...micAnimationStyle,
               }}
               onMouseDown={handleMicPress}
               onMouseUp={handleMicRelease}
               onTouchStart={handleMicPress}
               onTouchEnd={handleMicRelease}
-            ></div>
+            ><img
+            src={mic}
+            alt="mic"
+            style={styles.micIcon}
+          /></div>
             <div className={clsx("flex flex-col")}>
               <span className={clsx("font-normal break-words text-white")}>
                 {isTyping ? (
@@ -253,6 +258,11 @@ export default function CallScreen({
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
         cursor: "pointer",
+      },
+      micIcon: {
+        width: "30%",
+        height: "30%",
+        objectFit: "contain",
       },
       micText: {
         fontSize: "0.9em",
