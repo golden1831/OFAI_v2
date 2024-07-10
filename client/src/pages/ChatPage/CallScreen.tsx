@@ -41,52 +41,46 @@ export default function CallScreen({
   const handleMicPress = async () => {
     if (!isRecording) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        const mediaRecorder = new MediaRecorder(stream);
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
         audioChunksRef.current = [];
-
-        mediaRecorder.ondataavailable = async (event) => {
+  
+        mediaRecorder.ondataavailable = (event) => {
           if (event.data.size > 0) {
-            const audioBlob = event.data;
-            const formData = new FormData();
-            formData.append("file", audioBlob);
-
-            try {
-              setIsTyping(true); // Set typing status to true
-              const response = await fetch(
-                "https://api.deepgram.com/v1/listen",
-                {
-                  method: "POST",
-                  headers: {
-                    Authorization: `Token ${
-                      import.meta.env.VITE_DEEPGRAM_API_KEY
-                    }`,
-                  },
-                  body: formData,
-                }
-              );
-
-              const result = await response.json();
-              console.log(result);
-              const transcript =
-                result.results.channels[0].alternatives[0].transcript;
-              if (transcript) {
-                await sendTranscriptToBackend(transcript);
-              }
-            } catch (error) {
-              console.error("Error transcribing audio:", error);
-            } finally {
-              setIsTyping(false); // Set typing status to false
-            }
+            audioChunksRef.current.push(event.data);
           }
         };
-
+  
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          const formData = new FormData();
+          formData.append("file", audioBlob);
+  
+          try {
+            setIsTyping(true);
+            const response = await fetch("https://api.deepgram.com/v1/listen", {
+              method: "POST",
+              headers: {
+                Authorization: `Token ${import.meta.env.VITE_DEEPGRAM_API_KEY}`,
+              },
+              body: formData,
+            });
+  
+            const result = await response.json();
+            const transcript = result.results.channels[0].alternatives[0].transcript;
+            if (transcript) {
+              await sendTranscriptToBackend(transcript);
+            }
+          } catch (error) {
+            console.error("Error transcribing audio:", error);
+          } finally {
+            setIsTyping(false);
+          }
+        };
+  
         mediaRecorder.start();
         mediaRecorderRef.current = mediaRecorder;
         setIsRecording(true);
-        console.log("Recording started");
       } catch (error) {
         console.error("Microphone access denied or not supported", error);
         alert("Microphone access denied or not supported");
@@ -95,17 +89,15 @@ export default function CallScreen({
       handleMicRelease();
     }
   };
-
+  
   const handleMicRelease = () => {
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state === "recording"
-    ) {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      console.log("Recording stopped");
     }
   };
+  
+  
 
   const sendTranscriptToBackend = async (transcript: string) => {
     try {
@@ -117,6 +109,7 @@ export default function CallScreen({
       }).unwrap();
       setContent(response.message);
       const audioUrl = response.voicecontenturl; // Assume the backend response includes the audio URL
+      console.log(response.voicecontenturl)
       if (audioUrl) {
         setAudioUrl(audioUrl);
         playAudio(audioUrl);
