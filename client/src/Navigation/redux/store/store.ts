@@ -10,6 +10,7 @@ import { persistReducer } from 'redux-persist';
 import { messageApi } from '../apis/messageApi';
 import { companionApi } from '../apis/companionApi';
 import { userApi } from '../apis/userApi';
+import { deepgramAPI } from '../apis/otherApi'; 
 import { TypedUseSelectorHook } from 'react-redux';
 
 const rootReducer = combineReducers({
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   [messageApi.reducerPath]: messageApi.reducer,
   [companionApi.reducerPath]: companionApi.reducer,
   [userApi.reducerPath]: userApi.reducer,
+  [deepgramAPI.reducerPath]: deepgramAPI.reducer, 
 });
 
 const persistConfig = {
@@ -36,7 +38,12 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }).concat(messageApi.middleware, companionApi.middleware, userApi.middleware),
+    }).concat(
+      messageApi.middleware,
+      companionApi.middleware,
+      userApi.middleware,
+      deepgramAPI.middleware // Add deepgramAPI middleware
+    ),
 });
 
 // exporting the store

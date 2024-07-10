@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction, useState, useRef } from "react";
 import mic from "../../assets/icons/mic.svg";
 import replay from "../../assets/icons/replay.svg";
 import { useSendMessageMutation } from "../../Navigation/redux/apis/messageApi";
+import { useGetTranscriptMutation } from '../../Navigation/redux/apis/otherApi'; // Ensure the correct path to your API file
 import { MessageMode } from "../../types/message.types";
 import { useWeb3Auth } from "../../providers/Wallet";
 import { pinkMicrophoneIcon } from "../../assets/icons/pink";
@@ -26,6 +27,7 @@ export default function CallScreen({
   const [isTyping, setIsTyping] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [sendMessageMutation] = useSendMessageMutation();
+  const [getTranscript] = useGetTranscriptMutation();
   const { headers } = useWeb3Auth();
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -44,30 +46,20 @@ export default function CallScreen({
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
         audioChunksRef.current = [];
-  
+
         mediaRecorder.ondataavailable = (event) => {
           if (event.data.size > 0) {
             audioChunksRef.current.push(event.data);
           }
         };
-  
+
         mediaRecorder.onstop = async () => {
           const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-          const formData = new FormData();
-          formData.append("file", audioBlob);
-  
+
           try {
             setIsTyping(true);
-            const response = await fetch("https://api.deepgram.com/v1/listen", {
-              method: "POST",
-              headers: {
-                Authorization: `Token ${import.meta.env.VITE_DEEPGRAM_API_KEY}`,
-              },
-              body: formData,
-            });
-  
-            const result = await response.json();
-            const transcript = result.results.channels[0].alternatives[0].transcript;
+            const transcriptData = await getTranscript({ audioBlob }).unwrap();
+            const transcript = transcriptData.results.channels[0].alternatives[0].transcript;
             if (transcript) {
               await sendTranscriptToBackend(transcript);
             }
@@ -77,7 +69,7 @@ export default function CallScreen({
             setIsTyping(false);
           }
         };
-  
+
         mediaRecorder.start();
         mediaRecorderRef.current = mediaRecorder;
         setIsRecording(true);
@@ -89,7 +81,7 @@ export default function CallScreen({
       handleMicRelease();
     }
   };
-  
+
   const handleMicRelease = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       mediaRecorderRef.current.stop();
@@ -234,7 +226,7 @@ const styles = {
     background: "rgba(0,0,0,0.3)",
     display: "flex",
     alignItems: "center",
-    "@media (max-width: 768px)": {
+    "@media (maxWidth: 768px)": {
       // Media query for mobile devices
       width: "80%", // Adjusted width for mobile
     },
@@ -253,7 +245,7 @@ const styles = {
     height: "130%",
     width: "100%",
     transform: "translate(1%, 70%) scale(2.3)", // Adjust the scale value to zoom in or out
-    objectFit: "cover",
+    objectFit: "cover" as const,
   },
   tick: {
     width: "12px",
@@ -309,7 +301,7 @@ const styles = {
     alignItems: "center", // Center vertically
     justifyContent: "center", // Center horizontally
     cursor: "pointer",
-    "@media (max-width: 768px)": {
+    "@media (maxWidth: 768px)": {
       // Media query for mobile devices
       width: "40px", // Adjusted width for mobile
       height: "40px", // Adjusted height for mobile
