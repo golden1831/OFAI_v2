@@ -1,29 +1,35 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
-import Form from './form';
-import Messages from './messages';
-import ChatNav from './ChatNav';
-import { useWeb3Auth } from '../../providers/Wallet';
-import { ButtonPrimary } from '../../components/utilities/PrimaryButton';
-import { Gift } from './Gift';
-import ChatInboxPage from '../ChatInboxPage';
-import Popup from '../../components/utilities/PopUp';
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import Form from "./form";
+import Messages from "./messages";
+import ChatNav from "./ChatNav";
+import { useWeb3Auth } from "../../providers/Wallet";
+import { ButtonPrimary } from "../../components/utilities/PrimaryButton";
+import { Gift } from "./Gift";
+import ChatInboxPage from "../ChatInboxPage";
+import Popup from "../../components/utilities/PopUp";
 import {
   useGetMessageWhenSignOutMutation,
   useLazyGetChatRoomsQuery,
   useLazyGetMessagesQuery,
   useSendMessageMutation,
-} from '../../Navigation/redux/apis/messageApi';
-import { MessageMode, MessageType, RoleType, getRoomLvl } from '../../types/message.types';
-import { useParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { pinkCircleCheckIcon } from '../../assets/icons/pink';
-import { Helmet } from 'react-helmet-async';
-import { RootState } from '../../Navigation/redux/store/store';
-import { useGetCompanionsByUsernameQuery } from '../../Navigation/redux/apis/companionApi';
-import { LoadingSpinner } from '../../components/LoadingSpinner';
-import { IMessageChat } from './types';
-import CallScreen from './CallScreen';
+} from "../../Navigation/redux/apis/messageApi";
+import {
+  MessageMode,
+  MessageType,
+  RoleType,
+  getRoomLvl,
+} from "../../types/message.types";
+import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { pinkCircleCheckIcon } from "../../assets/icons/pink";
+import { Helmet } from "react-helmet-async";
+import { RootState } from "../../Navigation/redux/store/store";
+import { useGetCompanionsByUsernameQuery } from "../../Navigation/redux/apis/companionApi";
+import { LoadingSpinner } from "../../components/LoadingSpinner";
+import { IMessageChat } from "./types";
+import CallScreen from "./CallScreen";
+import VideoChatScreen from "./VideoChatScreen"
 
 const ChatPage = () => {
   const [mode, setMode] = useState<MessageMode>(MessageMode.text);
@@ -32,13 +38,17 @@ const ChatPage = () => {
   const [isloading, setIsLoading] = useState(true);
   const [showGiftUI, setShowGiftUI] = useState(false);
   const [isResponding, setisResponding] = useState(false);
-  const [messageContent, setMessageContent] = useState('');
+  const [messageContent, setMessageContent] = useState("");
   const [showSignInPopup, setShowSignInPopup] = useState(false);
   const [togglePicOptions, setTogglePicOptions] = useState(false);
-  const [messageIdReceveid, setMessageIdReceived] = useState<string | null>(null);
-  const [isCalling, setIsCalling] = useState(false); // State to manage call screen visibility
+  const [messageIdReceveid, setMessageIdReceived] = useState<string | null>(
+    null
+  );
+  const [isCalling, setIsCalling] = useState(false); 
+  const [isVideoCalling, setIsVideoCalling] = useState(false); 
 
   const bottomRef = useRef<HTMLDivElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const user = useSelector((state: RootState) => state.user?.user);
   const authStatus = useSelector((state: RootState) => state.auth.authStatus);
@@ -64,14 +74,16 @@ const ChatPage = () => {
 
   useEffect(() => {
     if (messages.length > 0) {
-      const filterUserMessages = messages.filter((message) => message.role === RoleType.user);
+      const filterUserMessages = messages.filter(
+        (message) => message.role === RoleType.user
+      );
 
       setUserXP(filterUserMessages.length * 10);
     }
   }, [messages]);
 
   const sendMessage = async (message: string) => {
-    if (!model || !headers) throw new Error('No auth headers found');
+    if (!model || !headers) throw new Error("No auth headers found");
 
     try {
       const res = await sendMessageMutation({
@@ -83,17 +95,13 @@ const ChatPage = () => {
 
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const {
-        _id,
-        createdAt,
-        ...rest
-      } = res
+      const { _id, createdAt, ...rest } = res;
 
       const data = {
         ...rest,
         id: _id,
         createdAt: new Date(createdAt).toISOString(),
-      }
+      };
 
       setMessages((prev) => [...prev, data]);
 
@@ -111,22 +119,23 @@ const ChatPage = () => {
 
     if (!authStatus) {
       await connect();
-      
+
       return;
     }
 
-    if (!textMessage && (!messageContent || messageContent.trim() === '')) return;
+    if (!textMessage && (!messageContent || messageContent.trim() === ""))
+      return;
 
     setisResponding(true);
 
     const value = textMessage || messageContent;
 
-    setMessageContent('');
+    setMessageContent("");
 
     const message: IMessageChat = {
       id: (messages.length + 1).toString(),
       role: RoleType.user,
-      type: mode === 'text' ? MessageType.message : MessageType.audio,
+      type: mode === "text" ? MessageType.message : MessageType.audio,
       user: {
         name: user.name ?? user.walletAddress,
         username: user.username,
@@ -146,17 +155,19 @@ const ChatPage = () => {
     if (nextUserLevel > previousUserLevel) {
       const Feedback = () => (
         <div className="flex flex-col gap-0.5">
-          <h6 className="text-base font-semibold text-white">Congratulations 🎉 {user.name?.split(' ')[0]}</h6>
+          <h6 className="text-base font-semibold text-white">
+            Congratulations 🎉 {user.name?.split(" ")[0]}
+          </h6>
           <p className="text-sm text-white">{`You have reached level ${nextUserLevel}`}</p>
         </div>
       );
 
       toast.success(<Feedback />, {
         icon: <img src={pinkCircleCheckIcon} alt="" className="size-6" />,
-        position: 'top-right',
-        className: 'rounded-3xl bg-white/5 backdrop-blur-lg',
+        position: "top-right",
+        className: "rounded-3xl bg-white/5 backdrop-blur-lg",
         closeButton: false,
-        progressClassName: 'bg-primary-500',
+        progressClassName: "bg-primary-500",
       });
     }
 
@@ -170,7 +181,7 @@ const ChatPage = () => {
   useEffect(() => {
     const options = {
       root: null,
-      rootMargin: '0px',
+      rootMargin: "0px",
       threshold: 0.5,
     };
 
@@ -178,9 +189,9 @@ const ChatPage = () => {
       if (!entry.isIntersecting) {
         if (bottomRef.current) {
           bottomRef.current.scrollIntoView({
-            behavior: 'smooth',
-            block: 'end',
-            inline: 'nearest',
+            behavior: "smooth",
+            block: "end",
+            inline: "nearest",
           });
         }
       }
@@ -203,18 +214,18 @@ const ChatPage = () => {
             headers,
             companionid: model._id,
           });
-    
+
           if (data) {
             if (data.total === 0) {
               setisResponding(true);
-    
-              await sendMessage('getSalutation');
-    
-              await getChatRooms({ headers })
-    
-              setMessageContent('');
+
+              await sendMessage("getSalutation");
+
+              await getChatRooms({ headers });
+
+              setMessageContent("");
             }
-    
+
             setMessages((prevMessages) => [
               ...data.messages.map((message) => ({
                 ...message,
@@ -224,7 +235,7 @@ const ChatPage = () => {
               ...prevMessages,
             ]);
           }
-    
+
           setIsLoading(false);
         } catch (error) {
           console.log(error);
@@ -251,10 +262,7 @@ const ChatPage = () => {
       if (data) {
         const totalMessageLength = 0;
 
-        const {
-          _id,
-          ...rest
-        } = data
+        const { _id, ...rest } = data;
 
         setMessages([
           {
@@ -275,7 +283,7 @@ const ChatPage = () => {
   }, [model, authStatus, getMessageWhenSignOut]);
 
   useEffect(() => {
-    if (!authStatus && messageContent !== '') setShowSignInPopup(true);
+    if (!authStatus && messageContent !== "") setShowSignInPopup(true);
   }, [authStatus, messageContent]);
 
   if (!model) {
@@ -286,7 +294,8 @@ const ChatPage = () => {
     );
   }
 
-  console.log({ showSignInPopup })
+  console.log({ showSignInPopup });
+  console.log(`Model url: ${model.image.url}`);
 
   return (
     <div className="size-full overflow-hidden flex justify-center items-center">
@@ -294,37 +303,69 @@ const ChatPage = () => {
         <meta property="og:image" content={model.image.url} />
         <meta property="og:description" content={model.shortBio} />
       </Helmet>
-  
+
       {isCalling && (
         <div
           style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0)',
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0)",
             zIndex: 1002,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            transform: 'translate(-50%, -50%)',
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            transform: "translate(-50%, -50%)",
           }}
         >
-          <CallScreen profileImage={model.image.url} profileName={model.firstName} modelId={model._id} setIsCalling={setIsCalling} />
+          <CallScreen
+            profileImage={model.image.url}
+            profileName={model.firstName}
+            modelId={model._id}
+            setIsCalling={setIsCalling}
+            streamRef={streamRef}
+          />
         </div>
       )}
-  
+
+  {isVideoCalling && (
+          <div
+            style={{
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0)",
+              zIndex: 1002,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            <VideoChatScreen
+              profileImage={model.image.url}
+              profileName={model.firstName}
+              modelId={model._id}
+              setIsVideoCalling={setIsVideoCalling}
+              streamRef={streamRef}
+            />
+          </div>
+        )}
+
       <div className="size-full flex justify-between items-center">
         <div
           style={{
-            backgroundImage: `url(${model?.image.url || ''})`,
-            filter: isCalling ? 'blur(5px)' : 'none',
+            backgroundImage: `url(${model?.image.url || ""})`,
+            filter: isCalling ? "blur(5px)" : "none",
           }}
           className="fixed top-0 w-full h-dvh bg-cover bg-top bg-no-repeat flex-col gap-2 overflow-hidden sm:gap-4 md:h-full md:relative"
         >
           <ChatNav Model={model} userXP={userXP} />
-  
+
           <Messages
             mode={mode}
             user={user}
@@ -335,7 +376,7 @@ const ChatPage = () => {
             togglePicOptions={togglePicOptions}
             messageIdReceveid={messageIdReceveid}
           />
-  
+
           <Form
             mode={mode}
             setMode={setMode}
@@ -347,8 +388,10 @@ const ChatPage = () => {
             setMessageContent={setMessageContent}
             setTogglePicOptions={setTogglePicOptions}
             setIsCalling={setIsCalling}
+            setIsVideoCalling={setIsVideoCalling}
+            streamRef={streamRef}
           />
-  
+
           {showGiftUI && (
             <Gift
               modelImage={model.image.url}
@@ -357,23 +400,31 @@ const ChatPage = () => {
             />
           )}
         </div>
-  
+
         <div
           className="w-1/2 h-full hidden md:flex"
           style={{
             zIndex: 1,
-            filter: isCalling ? 'blur(5px)' : 'none',
+            filter: isCalling ? "blur(5px)" : "none",
           }}
         >
           <ChatInboxPage />
         </div>
       </div>
-  
-      <Popup imageUrl={model.image.url} show={showSignInPopup} close={() => setShowSignInPopup(false)}>
-        <h1 className="font-bold text-2xl text-center">Sign-up and get 500 GEMS for free!</h1>
-  
-        <p className="text-center">You'll get 10 free messages & 10 GEMS each day you check-in 😉</p>
-  
+
+      <Popup
+        imageUrl={model.image.url}
+        show={showSignInPopup}
+        close={() => setShowSignInPopup(false)}
+      >
+        <h1 className="font-bold text-2xl text-center">
+          Sign-up and get 500 GEMS for free!
+        </h1>
+
+        <p className="text-center">
+          You'll get 10 free messages & 10 GEMS each day you check-in 😉
+        </p>
+
         <ButtonPrimary
           onClick={async () => {
             setShowSignInPopup(false);
@@ -385,8 +436,6 @@ const ChatPage = () => {
       </Popup>
     </div>
   );
-  
-  
 };
 
 export default ChatPage;

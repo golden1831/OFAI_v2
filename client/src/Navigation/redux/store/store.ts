@@ -1,5 +1,4 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-
 import AuthSlice from '../slice/AuthSlice';
 import UserSlice from '../slice/UserSlice';
 import ModelsSlice from '../slice/ModelsSlice';
@@ -11,7 +10,8 @@ import { messageApi } from '../apis/messageApi';
 import { companionApi } from '../apis/companionApi';
 import { userApi } from '../apis/userApi';
 import { deepgramAPI } from '../apis/otherApi'; 
-import { TypedUseSelectorHook } from 'react-redux';
+import { videoApi } from '../apis/d_idApi'; // Import the videoApi
+import { TypedUseSelectorHook, useSelector } from 'react-redux';
 
 const rootReducer = combineReducers({
   auth: AuthSlice,
@@ -22,7 +22,8 @@ const rootReducer = combineReducers({
   [messageApi.reducerPath]: messageApi.reducer,
   [companionApi.reducerPath]: companionApi.reducer,
   [userApi.reducerPath]: userApi.reducer,
-  [deepgramAPI.reducerPath]: deepgramAPI.reducer, 
+  [deepgramAPI.reducerPath]: deepgramAPI.reducer,
+  [videoApi.reducerPath]: videoApi.reducer, // Add the videoApi reducer
 });
 
 const persistConfig = {
@@ -42,7 +43,8 @@ const store = configureStore({
       messageApi.middleware,
       companionApi.middleware,
       userApi.middleware,
-      deepgramAPI.middleware // Add deepgramAPI middleware
+      deepgramAPI.middleware, // Add deepgramAPI middleware
+      videoApi.middleware // Add videoApi middleware
     ),
 });
 
@@ -52,4 +54,4 @@ export default store;
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
-export const useAppSelector: TypedUseSelectorHook<RootState> = store.getState;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

@@ -1,1 +1,8 @@
-{}
+{
+  "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.10",
+    "@ffmpeg/util": "^0.12.1",
+    "@heygen/streaming-avatar": "^1.0.14",
+    "cors": "^2.8.5"
+  }
+}

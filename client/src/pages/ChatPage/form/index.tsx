@@ -1,11 +1,8 @@
 import { Dispatch, FormEvent, SetStateAction, useRef, useState } from "react";
 import { imageIcon, twinkleIcon } from "../../../assets/icons";
-import {
-  voiceIcon,
-  chat2Icon,
-  pinkMicrophoneIcon,
-} from "../../../assets/icons/pink";
-import mic from "../../../assets/icons/mic.svg"
+import { voiceIcon, chat2Icon } from "../../../assets/icons/pink";
+import mic from "../../../assets/icons/mic.svg";
+import videoIcon from "../../../assets/icons/chat/video.svg";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import BubblesFormFooter from "./BubblesFormFooter";
 import { MessageMode } from "../../../types/message.types";
@@ -22,6 +19,8 @@ interface FormProps {
   setMessageContent: (newMessage: string) => void;
   setTogglePicOptions: Dispatch<SetStateAction<boolean>>;
   setIsCalling: Dispatch<SetStateAction<boolean>>;
+  setIsVideoCalling: Dispatch<SetStateAction<boolean>>;
+  streamRef: React.MutableRefObject<MediaStream | null>;
 }
 
 export default function Form({
@@ -35,6 +34,8 @@ export default function Form({
   setMessageContent,
   setTogglePicOptions,
   setIsCalling,
+  setIsVideoCalling,
+  streamRef,
 }: FormProps) {
   const InputRef = useRef<HTMLInputElement>(null);
   const [hasMicPermission, setHasMicPermission] = useState(false); // State to track mic permission
@@ -50,10 +51,13 @@ export default function Form({
   const handleMicPress = async () => {
     if (!hasMicPermission) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        if (!streamRef.current) {
+          streamRef.current = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+        }
         // If the permission is granted, set the flag to true
         setHasMicPermission(true);
-        return;
       } catch (error) {
         // If permission is denied, show an alert
         alert("Please grant microphone access to start recording.");
@@ -65,6 +69,28 @@ export default function Form({
     setIsCalling(true);
   };
 
+  const handleVideoPress = async () => {
+    if (!hasMicPermission) {
+      try {
+        if (!streamRef.current) {
+          streamRef.current = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+        }
+
+        // If the permission is granted, set the flag to true
+        setHasMicPermission(true);
+      } catch (error) {
+        // If permission is denied, show an alert
+        alert("Please grant microphone access to start recording.");
+        return;
+      }
+    }
+
+    // Launch the CallScreen only if the permission is granted
+console.log("Video calling")
+    setIsVideoCalling(true);
+  };
 
   return (
     <>
@@ -115,19 +141,30 @@ export default function Form({
           />
           <div
             className={clsx(
-              "h-full rounded-r-full relative flex justify-center items-center p-1 bg-transparent",
+              "h-full rounded-r-full relative flex justify-center items-center p-1 bg-transparent"
             )}
             onMouseDown={handleMicPress}
           >
             <img
               src={mic}
               className={clsx(
-                "ml-1 mr-0.1 cursor-pointer transition-transform duration-200 size-6",
-
+                "ml-1 mr-0.1 cursor-pointer transition-transform duration-200 size-6"
               )}
             />
           </div>
-          
+          <div
+            className={clsx(
+              "h-full rounded-r-full relative flex justify-center items-center p-1 bg-transparent"
+            )}
+            onMouseDown={handleVideoPress}
+          >
+            <img
+              src={videoIcon}
+              className={clsx(
+                "ml-1 mr-0.1 cursor-pointer transition-transform duration-200 size-6"
+              )}
+            />
+          </div>
           <div className="h-full rounded-r-full relative flex justify-center items-center p-1 bg-transparent">
             {!userIsTyping ? (
               <div className="flex p-2.5 items-center justify-center rounded-full transition-all ease-in-out duration-150">
